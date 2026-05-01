@@ -61,8 +61,10 @@ export default function ProjectsPage() {
   const workspaceStats = useMemo(() => {
     const totalTasks = projects.reduce((sum, project) => sum + project.taskCount, 0);
     const completedTasks = projects.reduce((sum, project) => sum + project.completedTaskCount, 0);
+    const inProgressTasks = projects.reduce((sum, project) => sum + (project.inProgressTaskCount || 0), 0);
     const totalMembers = new Set(projects.flatMap((project) => project.members.map((member) => member._id))).size;
-    const completionRate = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const weightedCompletedTasks = completedTasks + inProgressTasks * 0.5;
+    const completionRate = totalTasks ? Math.round((weightedCompletedTasks / totalTasks) * 100) : 0;
 
     return {
       totalTasks,
@@ -272,7 +274,9 @@ export default function ProjectsPage() {
       <section className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
         {filteredProjects.length ? (
           filteredProjects.map((project) => {
-            const progress = project.taskCount ? Math.round((project.completedTaskCount / project.taskCount) * 100) : 0;
+            const progress = project.taskCount
+              ? Math.round(((project.completedTaskCount + (project.inProgressTaskCount || 0) * 0.5) / project.taskCount) * 100)
+              : 0;
 
             return (
               <Link

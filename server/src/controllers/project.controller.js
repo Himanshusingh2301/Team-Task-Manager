@@ -38,6 +38,15 @@ export const getProjects = asyncHandler(async (req, res) => {
               cond: { $eq: ["$$task.status", "done"] }
             }
           }
+        },
+        inProgressTaskCount: {
+          $size: {
+            $filter: {
+              input: "$tasks",
+              as: "task",
+              cond: { $eq: ["$$task.status", "in_progress"] }
+            }
+          }
         }
       }
     },
